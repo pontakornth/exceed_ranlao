@@ -16,13 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from ranlao.views import TableViewSet
+import ranlao.views
+from ranlao import views
+
 router = routers.DefaultRouter()
-router.register(r'table', TableViewSet)
+router.register(r'table', views.TableViewSet)
 
 
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('call/<int:pk>', views.call_staff),
+    path('complete/<int:pk>', views.complete_order),
     path('admin/', admin.site.urls),
 ]
