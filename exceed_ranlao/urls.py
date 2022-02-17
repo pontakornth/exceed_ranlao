@@ -30,5 +30,7 @@ urlpatterns = [
     path('call/<int:table_number>', views.call_staff, name='call_staff'),
     path('complete/<int:table_number>', views.complete_order, name='complete_order'),
     path('api-auth-token/',token_views.obtain_auth_token),
+    path('enter/', views.customer_enter),
+    path('leave/', views.customer_leave),
     path('admin/', admin.site.urls),
 ]

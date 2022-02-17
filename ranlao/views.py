@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -45,3 +45,29 @@ def complete_order(request, table_number):
     table.is_calling = False
     table.save()
     return Response({'message': 'success'}, status=HTTPStatus.OK)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication, SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def customer_enter(request):
+    """
+    Increase customer enter for this hour.
+
+    This view is only called from hardware.
+    """
+    # TODO: Implement
+    return None
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication, SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def customer_leave(request):
+    """
+    Decrease customer for this hour.
+
+    This view is only called from hardware.
+    """
+    # TODO: Implement
+    return None
