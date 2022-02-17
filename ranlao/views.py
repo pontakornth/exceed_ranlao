@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from http import HTTPStatus
 
@@ -16,6 +18,8 @@ class TableViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def call_staff(request, table_number):
     """
     Call the staff to come to the table
@@ -28,6 +32,8 @@ def call_staff(request, table_number):
 
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def complete_order(request, table_number):
     """
     Complete the order customers requested.
