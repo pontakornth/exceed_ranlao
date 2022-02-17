@@ -9,14 +9,16 @@ class TableViewTest(APITestCase):
     def setUp(self) -> None:
         self.table = Table.objects.create(table_number=1)
 
-    def test_call_staff(self):
+    def test_call_staff_with_auth(self):
+        self.client.login()
         url = reverse('call_staff', args=[1])
         self.client.post(url)
         # Refresh from DB is required as we mutated it.
         self.table.refresh_from_db()
         self.assertTrue(self.table.is_calling)
 
-    def test_complete_order(self):
+    def test_complete_order_with_auth(self):
+        self.client.login()
         url = reverse('complete_order', args=[1])
         self.client.post(url)
         self.table.refresh_from_db()
