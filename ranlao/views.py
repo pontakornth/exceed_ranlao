@@ -16,26 +16,26 @@ class TableViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
-def call_staff(request, pk):
+def call_staff(request, table_number):
     """
     Call the staff to come to the table
     """
     # TODO: Add auth
-    table = get_object_or_404(Table, table_number=pk)
+    table = get_object_or_404(Table, table_number=table_number)
     table.is_calling = True
     table.save()
     return Response({'message': 'success'}, status=HTTPStatus.OK)
 
 
 @api_view(['POST'])
-def complete_order(request, pk):
+def complete_order(request, table_number):
     """
     Complete the order customers requested.
 
     The table will be back to non-calling state.
     """
     # TODO: Add auth
-    table = get_object_or_404(Table, table_number=pk)
+    table = get_object_or_404(Table, table_number=table_number)
     table.is_calling = False
     table.save()
     return Response({'message': 'success'}, status=HTTPStatus.OK)

@@ -26,7 +26,7 @@ router.register(r'table', views.TableViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('call/<int:pk>', views.call_staff),
-    path('complete/<int:pk>', views.complete_order),
+    path('call/<int:table_number>', views.call_staff, name='call_staff'),
+    path('complete/<int:table_number>', views.complete_order, name='complete_order'),
     path('admin/', admin.site.urls),
 ]
