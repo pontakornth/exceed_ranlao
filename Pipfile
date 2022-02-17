@@ -9,6 +9,7 @@ djangorestframework = "*"
 markdown = "*"
 django-filter = "*"
 python-decouple = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 
 [dev-packages]
 
