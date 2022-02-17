@@ -58,6 +58,8 @@ MIDDLEWARE = [
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+STATIC_ROOT= BASE_DIR / 'static'
+
 ROOT_URLCONF = 'exceed_ranlao.urls'
 
 TEMPLATES = [
