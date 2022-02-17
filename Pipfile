@@ -10,6 +10,7 @@ markdown = "*"
 django-filter = "*"
 python-decouple = "*"
 uvicorn = {extras = ["standard"], version = "*"}
+whitenoise = "*"
 
 [dev-packages]
 
