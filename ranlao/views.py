@@ -24,7 +24,6 @@ def call_staff(request, table_number):
     """
     Call the staff to come to the table
     """
-    # TODO: Add auth
     table = get_object_or_404(Table, table_number=table_number)
     table.is_calling = True
     table.save()
@@ -40,7 +39,6 @@ def complete_order(request, table_number):
 
     The table will be back to non-calling state.
     """
-    # TODO: Add auth
     table = get_object_or_404(Table, table_number=table_number)
     table.is_calling = False
     table.save()
