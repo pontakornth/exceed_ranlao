@@ -55,7 +55,7 @@ def customer_enter(request):
     This view is only called from hardware.
     """
     # TODO: Implement
-    return None
+    return Response({'message': 'success'})
 
 
 @api_view(['POST'])
@@ -68,4 +68,10 @@ def customer_leave(request):
     This view is only called from hardware.
     """
     # TODO: Implement
-    return None
+    return Response({'message': 'success'})
+
+
+@api_view(['GET'])
+def get_current_customers(request):
+    """Get numbers of current customers."""
+    return Response({'amount': -1})
