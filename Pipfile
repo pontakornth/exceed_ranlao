@@ -11,8 +11,10 @@ django-filter = "*"
 python-decouple = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 whitenoise = "*"
+django-cors-headers = "*"
 
 [dev-packages]
+freezegun = "*"
 
 [requires]
 python_version = "3.8"
