@@ -6,11 +6,11 @@ from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from http import HTTPStatus
 
-from .models import Table, VisitorLog
+from .models import Table, VisitorLog, UserTable
 from .serializers import TableSerializer, LogSerializer
 
 
@@ -79,7 +79,7 @@ def call_staff(request, table_number):
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def complete_order(request, table_number):
     """
     Complete the order customers requested.
@@ -128,6 +128,21 @@ def get_current_customers(request):
 
 
 @api_view(['GET'])
+def get_user_status(request):
+    """
+    Get user status of table and is staff
+    """
+    user = request.user
+    try:
+        table = UserTable.objects.get(user=user)
+    except UserTable.DoesNotExist:
+        table = None
+    return Response({'is_staff': user.is_staff, 'table': table.table.table_number if table else None})
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def get_statistic(request):
     """
     Get statistic of customer from 18:00 - 24:00.

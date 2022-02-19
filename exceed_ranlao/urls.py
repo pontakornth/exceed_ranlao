@@ -20,6 +20,8 @@ import ranlao.views
 from ranlao import views
 from rest_framework.authtoken import views as token_views
 
+from ranlao.middlewares import CustomAuthToken
+
 router = routers.DefaultRouter()
 router.register(r'table', views.TableViewSet)
 router.register(r'log', views.LogViewSets)
@@ -30,10 +32,11 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('call/<int:table_number>', views.call_staff, name='call_staff'),
     path('complete/<int:table_number>', views.complete_order, name='complete_order'),
-    path('api-auth-token/', token_views.obtain_auth_token, name='get_token'),
+    path('api-auth-token/', CustomAuthToken.as_view(), name='get_token'),
     path('enter/', views.customer_enter, name='enter'),
     path('leave/', views.customer_leave, name='leave'),
     path('count/', views.get_current_customers, name='count'),
     path('stat/', views.get_statistic, name='statistic'),
+    path('user-status/', views.get_user_status, name='user_status')
     path('admin/', admin.site.urls, name='admin'),
 ]
