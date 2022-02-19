@@ -13,4 +13,4 @@ class Table(models.Model):
 class VisitorLog(models.Model):
     """Log of visitor by hour."""
     log_time = models.DateTimeField(null=False)
-    amount = models.IntegerField(validators=[MinValueValidator(0)], null=False)
+    amount = models.IntegerField(validators=[MinValueValidator(0)], null=False, default=0)
