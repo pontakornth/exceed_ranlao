@@ -36,11 +36,9 @@ def change_log_by_time(time: datetime.datetime, amount: int):
                                          .order_by('-log_time') \
                                          .first()
         if not previous_log:
-            print(f"There is no previous log.")
             # If there is no previous log, create one for 6 hours ago.
             previous_log = VisitorLog.objects.create(log_time=maximum_rollback)
         else:
-            print(f"There is a previous log at {previous_log.log_time}, the amount is {previous_log.amount}")
         # Create all logs after previous one
         # Set the amount to the same as previous one because there is no signal sent.
         hours_different = zero_time.hour - previous_log.log_time.hour + 1
@@ -48,7 +46,6 @@ def change_log_by_time(time: datetime.datetime, amount: int):
             [VisitorLog(log_time=zero_time - datetime.timedelta(hours=t), amount=previous_log.amount) for t in
              range(1, hours_different)])
         current_log.amount = previous_log.amount
-        print(f"The current amount before adding is {current_log.amount}")
     # Change if the change makes sense.
     if current_log.amount + amount >= 0:
         current_log.amount += amount
