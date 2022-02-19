@@ -54,6 +54,7 @@ class TableViewTest(APITestCase):
 
 class CountingViewTest(APITestCase):
     """Test cases for testing counting customer correctly."""
+
     def setUp(self) -> None:
         """Authenticate the hardware and setup time."""
         self.user = User.objects.create_user(username="bad", password="BadPassword123")
@@ -105,3 +106,15 @@ class CountingViewTest(APITestCase):
             response = self.client.get(reverse('count'))
             self.assertEqual(response.data['amount'], 0)
 
+
+class StatisticViewTest(APITestCase):
+    """
+    Tests for statistic view.
+
+    The store only opens on 18:00 - 24:00.
+    """
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username="table01", password="TableExceed01")
+        self.client.login(username="table01", password="TableExceed01")
+        self.statistic_url = reverse('statistic')
