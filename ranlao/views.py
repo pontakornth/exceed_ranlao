@@ -40,12 +40,11 @@ def change_log_by_time(time: datetime.datetime, amount: int):
             previous_log = VisitorLog.objects.create(log_time=maximum_rollback)
         # Create all logs after previous one
         # Set the amount to the same as previous one because there is no signal sent.
-        hours_different = zero_time.hour - previous_log.log_time.hour + 1
-        for t in range(1, hours_different):
+        hours_different = zero_time.hour - previous_log.log_time.hour
+        for t in range(hours_different, 0, -1):
             log, created = VisitorLog.objects.get_or_create(log_time=zero_time - datetime.timedelta(hours=t))
-            if not created:
-                log.amount = previous_log.amount
-                log.save()
+            log.amount = previous_log.amount
+            log.save()
         current_log.amount = previous_log.amount
     # Change if the change makes sense.
     if current_log.amount + amount >= 0:

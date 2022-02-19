@@ -8,7 +8,8 @@ from rest_framework.test import APITestCase
 from freezegun import freeze_time
 
 # Create your tests here.
-from ranlao.models import Table
+from ranlao.models import Table, VisitorLog
+from ranlao.views import get_current_time_zero, change_log_by_time
 
 
 class TableViewTest(APITestCase):
@@ -145,3 +146,46 @@ class StatisticViewTest(APITestCase):
             print(stat)
             raw_stat = list(map(lambda x: x.get('amount', 0), stat))
             self.assertEqual(raw_stat, [4, 5, 5, 0, 0, 0])
+
+
+class ChangeLogByTimeTest(APITestCase):
+    """Change this one."""
+    def test_previous_log(self):
+        """The function works correctly when there is a previous log from the last hour."""
+        zero_time = get_current_time_zero()
+        previous_log = VisitorLog.objects.create(log_time=zero_time - datetime.timedelta(hours=1), amount=30)
+        change_log_by_time(zero_time, 1)
+        current_log = VisitorLog.objects.get(log_time=zero_time)
+        self.assertEqual(current_log.amount, 31)
+
+    def test_no_previous_log(self):
+        """The function works correctly when there is no previous log and it creates logs for previous 6 hours"""
+        zero_time = get_current_time_zero()
+        change_log_by_time(zero_time, 1)
+        for i in range(1, 7):
+            previous_log, created = VisitorLog.objects.get_or_create(log_time=zero_time - datetime.timedelta(hours=1))
+            if created:
+                self.fail("The function does not create previous log.")
+            self.assertEqual(previous_log.amount, 0)
+        current_log, created = VisitorLog.objects.get_or_create(log_time=zero_time)
+        if created:
+            self.fail("It should be already there.")
+        self.assertEqual(current_log.amount, 1)
+
+    def test_long_previous_log(self):
+        """The function works correctly when there is a previous log fewer than 6 hours."""
+        zero_time = get_current_time_zero()
+        previous_time = zero_time - datetime.timedelta(hours=5)
+        previous_log = VisitorLog.objects.create(log_time=previous_time, amount=7)
+        change_log_by_time(zero_time, 8)
+        for i in range(5, 0, -1):
+            previous_time = zero_time - datetime.timedelta(hours=i)
+            previous_log, created = VisitorLog.objects.get_or_create(log_time=previous_time)
+            if created:
+                self.fail("It should be created already. ")
+            self.assertEqual(previous_log.amount, 7, msg=f"Fail at hour {i} hours ago")
+        current_log, created = VisitorLog.objects.get_or_create(log_time=zero_time)
+        if created:
+            self.fail("It should be created already.")
+        self.assertEqual(current_log.amount, 7 + 8)
+
