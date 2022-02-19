@@ -37,6 +37,6 @@ urlpatterns = [
     path('leave/', views.customer_leave, name='leave'),
     path('count/', views.get_current_customers, name='count'),
     path('stat/', views.get_statistic, name='statistic'),
-    path('user-status/', views.get_user_status, name='user_status')
+    path('user-status/', views.get_user_status, name='user_status'),
     path('admin/', admin.site.urls, name='admin'),
 ]
