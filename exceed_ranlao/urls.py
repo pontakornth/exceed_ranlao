@@ -34,5 +34,6 @@ urlpatterns = [
     path('enter/', views.customer_enter, name='enter'),
     path('leave/', views.customer_leave, name='leave'),
     path('count/', views.get_current_customers, name='count'),
+    path('stat/', views.get_statistic, name='statistic'),
     path('admin/', admin.site.urls, name='admin'),
 ]

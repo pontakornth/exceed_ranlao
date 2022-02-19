@@ -23,7 +23,7 @@ def get_current_time_zero():
 
 def change_log_by_time(time: datetime.datetime, amount: int):
     """Change log by time"""
-    # Zero other details after houss
+    # Zero other details after hours
     zero_time = time.replace(minute=0, second=0, microsecond=0)
     current_log, created = VisitorLog.objects.get_or_create(log_time=zero_time)
     # If there is no current log, it is created.
@@ -33,17 +33,19 @@ def change_log_by_time(time: datetime.datetime, amount: int):
         maximum_rollback = zero_time - datetime.timedelta(hours=6)
         # Find the previous log upto 6 hours ago.
         previous_log = VisitorLog.objects.filter(log_time__lt=zero_time, log_time__gte=maximum_rollback) \
-                                         .order_by('-log_time') \
-                                         .first()
+            .order_by('-log_time') \
+            .first()
         if not previous_log:
             # If there is no previous log, create one for 6 hours ago.
             previous_log = VisitorLog.objects.create(log_time=maximum_rollback)
         # Create all logs after previous one
         # Set the amount to the same as previous one because there is no signal sent.
         hours_different = zero_time.hour - previous_log.log_time.hour + 1
-        VisitorLog.objects.bulk_create(
-            [VisitorLog(log_time=zero_time - datetime.timedelta(hours=t), amount=previous_log.amount) for t in
-             range(1, hours_different)])
+        for t in range(1, hours_different):
+            log, created = VisitorLog.objects.get_or_create(log_time=zero_time - datetime.timedelta(hours=t))
+            if not created:
+                log.amount = previous_log.amount
+                log.save()
         current_log.amount = previous_log.amount
     # Change if the change makes sense.
     if current_log.amount + amount >= 0:
@@ -123,3 +125,19 @@ def get_current_customers(request):
     current_time_zero = get_current_time_zero()
     current_log, created = VisitorLog.objects.get_or_create(log_time=current_time_zero)
     return Response({'amount': current_log.amount})
+
+
+@api_view(['GET'])
+def get_statistic(request):
+    """
+    Get statistic of customer from 18:00 - 24:00.
+
+    Note: This is intended for table and graph
+    """
+    current_time = get_current_time_zero()
+    # It has a weird behavior.
+    start_time = current_time.replace(hour=18) - datetime.timedelta(days=1)
+    end_time = current_time.replace(hour=23) - datetime.timedelta(days=1)
+    all_data = VisitorLog.objects.filter(log_time__gte=start_time, log_time__lte=end_time).order_by('log_time')
+    all_data_json = [{'date': x.log_time, 'amount': x.amount} for x in all_data]
+    return Response({'stat': all_data_json})

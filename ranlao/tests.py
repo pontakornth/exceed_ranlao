@@ -3,6 +3,7 @@ from http import HTTPStatus
 
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.test import APITestCase
 from freezegun import freeze_time
 
@@ -112,9 +113,35 @@ class StatisticViewTest(APITestCase):
     Tests for statistic view.
 
     The store only opens on 18:00 - 24:00.
+
+    Note: This assumes no signal is sent before 18:00
     """
 
     def setUp(self) -> None:
         self.user = User.objects.create_user(username="table01", password="TableExceed01")
         self.client.login(username="table01", password="TableExceed01")
         self.statistic_url = reverse('statistic')
+        self.enter_url = reverse('enter')
+        self.leave_url = reverse('leave')
+
+    def test_near_closing(self):
+        """Statistic is correct when almost closing."""
+        with freeze_time(datetime.datetime(2019, 12, 19, 18, 0, 0, 0)) as frozen_time:
+            # 4 for 18:00
+            for i in range(4):
+                self.client.post(self.enter_url)
+            # 5 for 19.00
+            print(timezone.now())
+            frozen_time.tick(delta=datetime.timedelta(hours=1))
+            self.client.post(self.enter_url)
+            # 0 for 21.00
+            frozen_time.tick(delta=datetime.timedelta(hours=3))
+            for i in range(5):
+                self.client.post(self.leave_url)
+            # There is no customer after 21.00
+            frozen_time.tick(delta=datetime.timedelta(hours=3))
+            response = self.client.get(self.statistic_url)
+            stat = response.data['stat']
+            print(stat)
+            raw_stat = list(map(lambda x: x.get('amount', 0), stat))
+            self.assertEqual(raw_stat, [4, 5, 5, 0, 0, 0])

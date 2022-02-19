@@ -1,5 +1,8 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.contrib.auth import get_user_model
+
+UserModel = get_user_model()
 
 
 # Create your models here.
@@ -14,3 +17,9 @@ class VisitorLog(models.Model):
     """Log of visitor by hour."""
     log_time = models.DateTimeField(null=False)
     amount = models.IntegerField(validators=[MinValueValidator(0)], null=False, default=0)
+
+
+class UserTable(models.Model):
+    """User and table association"""
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+    table = models.ForeignKey(Table, on_delete=models.CASCADE)
