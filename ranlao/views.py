@@ -24,7 +24,7 @@ def get_current_time_zero():
 def change_log_by_time(time: datetime.datetime, amount: int):
     """Change log by time"""
     # Zero other details after hours
-    zero_time = time.replace(minute=0, second=0, microsecond=0)
+    zero_time = time.replace(hour=time.hour, minute=0, second=0, microsecond=0)
     current_log, created = VisitorLog.objects.get_or_create(log_time=zero_time)
     # If there is no current log, it is created.
     # The amount will traceback to the previous record if there is any.
@@ -62,6 +62,12 @@ class TableViewSet(viewsets.ReadOnlyModelViewSet):
 class LogViewSets(viewsets.ReadOnlyModelViewSet):
     queryset = VisitorLog.objects.all().order_by('-log_time')
     serializer_class = LogSerializer
+
+    def list(self, request, *args, **kwargs):
+        """Get queries but convert the form first."""
+        logs = self.get_queryset()
+        converted_logs = [{'log_time': f"{log.log_time.hour}:00-{log.log_time.hour+1}:00", 'amount': log.amount } for log in logs]
+        return Response(converted_logs)
 
 
 @api_view(['POST'])
