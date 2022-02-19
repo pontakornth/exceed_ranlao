@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -7,8 +8,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from http import HTTPStatus
 
-from .models import Table
+from .models import Table, VisitorLog
 from .serializers import TableSerializer
+
+
+def get_current_time_zero():
+    current_time = timezone.now()
+    # Set zero
+    current_time_zero = current_time.replace(minute=0, second=0, microsecond=0)
+    return current_time_zero
 
 
 # Create your views here.
@@ -54,7 +62,10 @@ def customer_enter(request):
 
     This view is only called from hardware.
     """
-    # TODO: Implement
+    current_time_zero = get_current_time_zero()
+    current_log, _ = VisitorLog.objects.get_or_create(log_time=current_time_zero)
+    current_log.amount += 1
+    current_log.save()
     return Response({'message': 'success'})
 
 
@@ -67,11 +78,17 @@ def customer_leave(request):
 
     This view is only called from hardware.
     """
-    # TODO: Implement
+    current_time_zero = get_current_time_zero()
+    current_log, _ = VisitorLog.objects.get_or_create(log_time=current_time_zero)
+    if current_log.amount > 0:
+        current_log.amount -= 1
+    current_log.save()
     return Response({'message': 'success'})
 
 
 @api_view(['GET'])
 def get_current_customers(request):
     """Get numbers of current customers."""
-    return Response({'amount': -1})
+    current_time_zero = get_current_time_zero()
+    current_log, _ = VisitorLog.objects.get_or_create(log_time=current_time_zero)
+    return Response({'amount': current_log.amount})
