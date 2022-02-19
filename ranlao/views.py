@@ -12,7 +12,7 @@ from .serializers import TableSerializer
 
 
 # Create your views here.
-class TableViewSet(viewsets.ModelViewSet):
+class TableViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Table.objects.all()
     serializer_class = TableSerializer
 
