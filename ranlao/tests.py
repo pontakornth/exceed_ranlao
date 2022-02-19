@@ -85,9 +85,13 @@ class CountingViewTest(APITestCase):
             response = self.client.get(reverse('count'))
             self.assertEqual(response.data['amount'], 0)
             self.client.post(self.enter_url)
-            frozen_time.tick(delta=datetime.timedelta(hours=3))
             self.client.post(self.leave_url)
-            self.assertEqual(response.data['amount'], 1)
+            self.client.post(self.enter_url)
+            # There is 1 person.
+            frozen_time.tick(delta=datetime.timedelta(hours=3))
+            self.client.post(self.enter_url)
+            response = self.client.get(reverse('count'))
+            self.assertEqual(response.data['amount'], 2)
 
     def test_exit_only(self):
         """
