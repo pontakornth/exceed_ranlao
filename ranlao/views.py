@@ -38,7 +38,6 @@ def change_log_by_time(time: datetime.datetime, amount: int):
         if not previous_log:
             # If there is no previous log, create one for 6 hours ago.
             previous_log = VisitorLog.objects.create(log_time=maximum_rollback)
-        else:
         # Create all logs after previous one
         # Set the amount to the same as previous one because there is no signal sent.
         hours_different = zero_time.hour - previous_log.log_time.hour + 1
