@@ -66,7 +66,10 @@ class LogViewSets(viewsets.ReadOnlyModelViewSet):
         """Get queries but convert the form first."""
         logs = self.get_queryset()
         change_log_by_time(timezone.now(), 0)
-        converted_logs = [{'log_time': f"{log.log_time.hour}:00-{log.log_time.hour+1}:00", 'amount': log.amount } for log in logs]
+        converted_logs = []
+        for log in logs:
+            log_time = timezone.localtime(log.log_time)
+            converted_logs.append({'log_time': f"{log_time.hour}:00-{log_time.hour+1}:00", 'amount': log.amount})
         return Response(converted_logs)
 
 
