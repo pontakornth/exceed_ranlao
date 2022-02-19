@@ -22,6 +22,7 @@ from rest_framework.authtoken import views as token_views
 
 router = routers.DefaultRouter()
 router.register(r'table', views.TableViewSet)
+router.register(r'log', views.LogViewSets)
 
 
 urlpatterns = [
