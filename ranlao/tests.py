@@ -152,40 +152,43 @@ class ChangeLogByTimeTest(APITestCase):
     """Change this one."""
     def test_previous_log(self):
         """The function works correctly when there is a previous log from the last hour."""
-        zero_time = get_current_time_zero()
-        previous_log = VisitorLog.objects.create(log_time=zero_time - datetime.timedelta(hours=1), amount=30)
-        change_log_by_time(zero_time, 1)
-        current_log = VisitorLog.objects.get(log_time=zero_time)
-        self.assertEqual(current_log.amount, 31)
+        with freeze_time(datetime.datetime(2020, 1, 10, 1, 0, 0)):
+            zero_time = get_current_time_zero()
+            previous_log = VisitorLog.objects.create(log_time=zero_time - datetime.timedelta(hours=1), amount=30)
+            change_log_by_time(zero_time, 1)
+            current_log = VisitorLog.objects.get(log_time=zero_time)
+            self.assertEqual(current_log.amount, 31)
 
     def test_no_previous_log(self):
         """The function works correctly when there is no previous log and it creates logs for previous 6 hours"""
-        zero_time = get_current_time_zero()
-        change_log_by_time(zero_time, 1)
-        for i in range(1, 7):
-            previous_log, created = VisitorLog.objects.get_or_create(log_time=zero_time - datetime.timedelta(hours=1))
+        with freeze_time(datetime.datetime(2020, 1, 10, 1, 0, 0)):
+            zero_time = get_current_time_zero()
+            change_log_by_time(zero_time, 1)
+            for i in range(1, 7):
+                previous_log, created = VisitorLog.objects.get_or_create(log_time=zero_time - datetime.timedelta(hours=i))
+                if created:
+                    self.fail(f"The function does not create previous log. It is at {previous_log.log_time}")
+                self.assertEqual(previous_log.amount, 0)
+            current_log, created = VisitorLog.objects.get_or_create(log_time=zero_time)
             if created:
-                self.fail("The function does not create previous log.")
-            self.assertEqual(previous_log.amount, 0)
-        current_log, created = VisitorLog.objects.get_or_create(log_time=zero_time)
-        if created:
-            self.fail("It should be already there.")
-        self.assertEqual(current_log.amount, 1)
+                self.fail("It should be already there.")
+            self.assertEqual(current_log.amount, 1)
 
     def test_long_previous_log(self):
         """The function works correctly when there is a previous log fewer than 6 hours."""
-        zero_time = get_current_time_zero()
-        previous_time = zero_time - datetime.timedelta(hours=5)
-        previous_log = VisitorLog.objects.create(log_time=previous_time, amount=7)
-        change_log_by_time(zero_time, 8)
-        for i in range(5, 0, -1):
-            previous_time = zero_time - datetime.timedelta(hours=i)
-            previous_log, created = VisitorLog.objects.get_or_create(log_time=previous_time)
+        with freeze_time(datetime.datetime(2020, 1, 10, 1, 0, 0)):
+            zero_time = get_current_time_zero()
+            previous_time = zero_time - datetime.timedelta(hours=5)
+            previous_log = VisitorLog.objects.create(log_time=previous_time, amount=7)
+            change_log_by_time(zero_time, 8)
+            for i in range(5, 0, -1):
+                previous_time = zero_time - datetime.timedelta(hours=i)
+                previous_log, created = VisitorLog.objects.get_or_create(log_time=previous_time)
+                if created:
+                    self.fail("It should be created already. ")
+                self.assertEqual(previous_log.amount, 7, msg=f"Fail at hour {i} hours ago")
+            current_log, created = VisitorLog.objects.get_or_create(log_time=zero_time)
             if created:
-                self.fail("It should be created already. ")
-            self.assertEqual(previous_log.amount, 7, msg=f"Fail at hour {i} hours ago")
-        current_log, created = VisitorLog.objects.get_or_create(log_time=zero_time)
-        if created:
-            self.fail("It should be created already.")
-        self.assertEqual(current_log.amount, 7 + 8)
+                self.fail("It should be created already.")
+            self.assertEqual(current_log.amount, 7 + 8)
 
