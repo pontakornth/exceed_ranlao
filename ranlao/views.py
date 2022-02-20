@@ -59,7 +59,8 @@ class TableViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class LogViewSets(viewsets.ReadOnlyModelViewSet):
-    queryset = VisitorLog.objects.all().order_by('-log_time')
+    max_rollback = get_current_time_zero() - datetime.timedelta(hours=6)
+    queryset = VisitorLog.objects.filter(log_time__gte=max_rollback).order_by('-log_time')
     serializer_class = LogSerializer
 
     def list(self, request, *args, **kwargs):
